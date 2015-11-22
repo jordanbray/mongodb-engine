@@ -35,7 +35,7 @@ class GridFSStorageTest(TestCase):
         f = self.storage.open('storage_test', 'w')
         f.write('storage contents')
         f.close()
-        self.assert_(self.storage.exists('storage_test'))
+        self.assertTrue(self.storage.exists('storage_test'))
 
         test_file = self.storage.open('storage_test', 'r')
         self.assertEqual(test_file.read(), 'storage contents')
@@ -148,9 +148,9 @@ class GridFSStorageTest(TestCase):
         storage.save('storage_test_3', ContentFile('custom content'))
 
         dirs, files = self.storage.listdir('')
-        self.assertEqual(set(dirs), set([u'storage_dir_1']))
+        self.assertEqual(set(dirs), set(['storage_dir_1']))
         self.assertEqual(set(files),
-                         set([u'storage_test_1', u'storage_test_2']))
+                         set(['storage_test_1', 'storage_test_2']))
 
 
 class GridFSStorageTestWithoutLocation(GridFSStorageTest):

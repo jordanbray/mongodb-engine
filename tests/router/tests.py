@@ -10,7 +10,7 @@ class RouterTest(TestCase):
         from query.models import Blog
         Blog.objects.create()
         self.assertEqual(Blog.objects.using('other').count(), 1)
-        self.assertRaisesRegexp(DatabaseError, "no such table",
+        self.assertRaisesRegex(DatabaseError, "no such table",
             Blog.objects.using('default').count)
 
     def test_managed_models(self):
@@ -28,5 +28,5 @@ class RouterTest(TestCase):
         self.assertEqual(SQLiteModel.objects.using('default').get(), sql_obj)
 
         self.assertEqual(SQLiteModel.objects.using('other').count(), 0)
-        self.assertRaisesRegexp(DatabaseError, "no such table",
+        self.assertRaisesRegex(DatabaseError, "no such table",
                                 MongoDBModel.objects.using('default').count)

@@ -5,7 +5,7 @@ from django.core.exceptions import ImproperlyConfigured
 _mongodbs = []
 
 def _init_mongodbs():
-    for name, options in settings.DATABASES.iteritems():
+    for name, options in settings.DATABASES.items():
         if options['ENGINE'] != 'django_mongodb_engine':
             continue
         if options.get('IS_DEFAULT'):

@@ -1,5 +1,5 @@
-from __future__ import with_statement
-from cStringIO import StringIO
+
+from io import StringIO
 
 from django.core.management import call_command
 from django.contrib.sites.models import Site
@@ -9,10 +9,10 @@ from django.db.models import Q
 from gridfs import GridOut
 from pymongo import ASCENDING, DESCENDING, ReadPreference, version_tuple as pymongo_version
 from django_mongodb_engine.base import DatabaseWrapper
-from models import *
+from .models import *
 
 
-from utils import *
+from .utils import *
 
 
 class MongoDBEngineTests(TestCase):
@@ -32,18 +32,18 @@ class MongoDBEngineTests(TestCase):
         self.assertEqual(RawModel.objects.get(raw=A('b', 3)), obj2)
 
     def test_nice_monthday_query_exception(self):
-        with self.assertRaisesRegexp(DatabaseError, "not support month/day"):
+        with self.assertRaisesRegex(DatabaseError, "not support month/day"):
             DateModel.objects.get(date__month=1)
-        with self.assertRaisesRegexp(DatabaseError, "not support month/day"):
+        with self.assertRaisesRegex(DatabaseError, "not support month/day"):
             len(DateTimeModel.objects.filter(datetime__day=1))
 
     def test_nice_int_objectid_exception(self):
         msg = "AutoField \(default primary key\) values must be strings " \
               "representing an ObjectId on MongoDB \(got u?'%s' instead\)."
-        self.assertRaisesRegexp(
-                DatabaseError, msg % u'helloworld...',
+        self.assertRaisesRegex(
+                DatabaseError, msg % 'helloworld...',
                 RawModel.objects.create, id='helloworldwhatsup')
-        self.assertRaisesRegexp(
+        self.assertRaisesRegex(
             DatabaseError, (msg % '5') +
                 " Please make sure your SITE_ID contains a valid ObjectId string.",
             Site.objects.get, id='5')
@@ -143,7 +143,7 @@ class RegressionTests(TestCase):
         self.assertEqual(obj, CustomIDModel2.objects.get(id=41))
 
     def test_multiple_exclude(self):
-        objs = [RawModel.objects.create(raw=i) for i in xrange(1, 6)]
+        objs = [RawModel.objects.create(raw=i) for i in range(1, 6)]
         self.assertEqual(
             objs[-1],
             RawModel.objects.exclude(raw=1).exclude(raw=2)
@@ -159,12 +159,12 @@ class RegressionTests(TestCase):
     def test_multiple_exclude_random(self):
         from random import randint
 
-        for i in xrange(20):
+        for i in range(20):
             RawModel.objects.create(raw=i)
 
-        for i in xrange(10):
+        for i in range(10):
             q = RawModel.objects.all()
-            for i in xrange(randint(0, 20)):
+            for i in range(randint(0, 20)):
                 q = getattr(q, 'filter' if randint(0, 1) else 'exclude')(raw=i)
             list(q)
 
@@ -242,7 +242,7 @@ class DatabaseOptionTests(TestCase):
                 ]:
                     cls_code.append('    ' + line % name)
 
-            exec '\n'.join(cls_code) in locals()
+            exec('\n'.join(cls_code), locals())
 
             options = {'OPTIONS': {'OPERATIONS': flags}}
             with self.custom_database_wrapper(options, collection_class=Collection):
@@ -335,7 +335,7 @@ class NewStyleIndexTests(TestCase):
 
         self.assertIn(index_name, info)
 
-        for key, value in dict(default_properties, **properties).iteritems():
+        for key, value in dict(default_properties, **properties).items():
             self.assertEqual(info[index_name][key], value)
 
 
@@ -369,9 +369,9 @@ class GridFSFieldTests(TestCase):
         fh = open(__file__)
         fh.seek(42)
         obj = GridFSFieldTestModel(gridfile=fh)
-        self.assert_(obj.gridfile is fh)
+        self.assertTrue(obj.gridfile is fh)
         obj.save()
-        self.assert_(obj.gridfile is fh)
+        self.assertTrue(obj.gridfile is fh)
         obj = GridFSFieldTestModel.objects.get()
         self.assertIsInstance(obj.gridfile, GridOut)
         fh.seek(42)
@@ -380,9 +380,9 @@ class GridFSFieldTests(TestCase):
     def test_gridstring(self):
         data = open(__file__).read()
         obj = GridFSFieldTestModel(gridstring=data)
-        self.assert_(obj.gridstring is data)
+        self.assertTrue(obj.gridstring is data)
         obj.save()
-        self.assert_(obj.gridstring is data)
+        self.assertTrue(obj.gridstring is data)
         obj = GridFSFieldTestModel.objects.get()
         self.assertEqual(obj.gridstring, data)
 
@@ -480,7 +480,7 @@ class GridFSFieldTests(TestCase):
         self.assertEqual(col.count(), 1)
 
     def test_update(self):
-        self.assertRaisesRegexp(
+        self.assertRaisesRegex(
             DatabaseError, "Updates on GridFSFields are not allowed.",
             GridFSFieldTestModel.objects.update, gridfile='x')
 

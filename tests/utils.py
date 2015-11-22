@@ -20,7 +20,7 @@ def skip_all_except(*tests):
     class meta(type):
 
         def __new__(cls, name, bases, dict):
-            for attr in dict.keys():
+            for attr in list(dict.keys()):
                 if attr.startswith('test_') and attr not in tests:
                     del dict[attr]
             return type.__new__(cls, name, bases, dict)

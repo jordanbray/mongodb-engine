@@ -3,7 +3,7 @@ from datetime import datetime
 from django.db.models.aggregates import Count, Sum, Max, Min, Avg
 
 from .utils import TestCase
-from models import Person
+from .models import Person
 
 
 class SimpleTest(TestCase):

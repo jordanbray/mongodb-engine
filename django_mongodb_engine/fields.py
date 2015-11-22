@@ -165,7 +165,7 @@ try:
     # Used to satisfy South when introspecting models that use
     # GridFSField/GridFSString fields. Custom rules could be added
     # if needed.
-    from south.modelsinspector import add_introspection_rules
+    from .south.modelsinspector import add_introspection_rules
     add_introspection_rules(
         [], ['^django_mongodb_engine\.fields\.GridFSField'])
     add_introspection_rules(

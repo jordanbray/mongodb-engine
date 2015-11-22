@@ -49,7 +49,7 @@ class DatabaseOperations(NonrelDatabaseOperations):
         return 254
 
     def check_aggregate_support(self, aggregate):
-        import aggregations
+        from . import aggregations
         try:
             getattr(aggregations, aggregate.__class__.__name__)
         except AttributeError:
@@ -84,7 +84,7 @@ class DatabaseOperations(NonrelDatabaseOperations):
         """
         if value is None:
             return None
-        return unicode(value)
+        return str(value)
 
     def _value_for_db(self, value, field, field_kind, db_type, lookup):
         """
@@ -114,7 +114,7 @@ class DatabaseOperations(NonrelDatabaseOperations):
 
             # Provide a better message for invalid IDs.
             except (TypeError, InvalidId):
-                if isinstance(value, (str, unicode)) and len(value) > 13:
+                if isinstance(value, str) and len(value) > 13:
                     value = value[:10] + '...'
                 msg = "AutoField (default primary key) values must be " \
                       "strings representing an ObjectId on MongoDB (got " \
@@ -148,7 +148,7 @@ class DatabaseOperations(NonrelDatabaseOperations):
 
         # All keys have been turned into ObjectIds.
         if db_type == 'key':
-            value = unicode(value)
+            value = str(value)
 
         # We've converted dates and times to datetimes.
         elif db_type == 'date':
@@ -238,7 +238,7 @@ class DatabaseWrapper(NonrelDatabaseWrapper):
                                     'update': flags}
 
         # Lower-case all OPTIONS keys.
-        for key in options.iterkeys():
+        for key in options.keys():
             options[key.lower()] = options.pop(key)
 
         read_preference = options.get('read_preference')
@@ -269,7 +269,7 @@ class DatabaseWrapper(NonrelDatabaseWrapper):
             self.database = self.connection[db_name]
         except TypeError:
             exc_info = sys.exc_info()
-            raise ImproperlyConfigured, exc_info[1], exc_info[2]
+            raise ImproperlyConfigured(exc_info[1]).with_traceback(exc_info[2])
 
         if user and password:
             if not self.database.authenticate(user, password):

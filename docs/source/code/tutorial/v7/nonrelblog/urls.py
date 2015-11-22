@@ -1,6 +1,6 @@
 from django.conf.urls.defaults import patterns, url
 from django.views.generic import ListView, DetailView
-from models import Post
+from .models import Post
 
 post_detail = DetailView.as_view(model=Post)
 post_list = ListView.as_view(model=Post)

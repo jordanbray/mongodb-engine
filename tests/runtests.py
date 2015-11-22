@@ -11,8 +11,7 @@ def runtests(foo, settings='settings', extra=[], test_builtin=False):
     else:
         apps = foo
     if not test_builtin:
-        apps = filter(lambda name: not name.startswith('django.contrib.'),
-                      apps)
+        apps = [name for name in apps if not name.startswith('django.contrib.')]
     # pre-1.6 test runners don't understand full module names
     import django
     if django.VERSION < (1, 6):

@@ -11,7 +11,7 @@ try:
 except ImportError:
     from pymongo.objectid import ObjectId
 
-from models import Author, Article, Tag
+from .models import Author, Article, Tag
 
 
 class LookupTests(TestCase):
@@ -153,13 +153,13 @@ class LookupTests(TestCase):
         self.assertQuerysetEqual(
             Article.objects.values('headline'),
             [
-                {'headline': u'Article 5'},
-                {'headline': u'Article 6'},
-                {'headline': u'Article 4'},
-                {'headline': u'Article 2'},
-                {'headline': u'Article 3'},
-                {'headline': u'Article 7'},
-                {'headline': u'Article 1'},
+                {'headline': 'Article 5'},
+                {'headline': 'Article 6'},
+                {'headline': 'Article 4'},
+                {'headline': 'Article 2'},
+                {'headline': 'Article 3'},
+                {'headline': 'Article 7'},
+                {'headline': 'Article 1'},
             ],
             transform=identity)
         self.assertQuerysetEqual(
@@ -184,13 +184,13 @@ class LookupTests(TestCase):
         self.assertQuerysetEqual(
             Article.objects.values('id', 'headline').iterator(),
             [
-                {'headline': u'Article 5', 'id': self.a5.id},
-                {'headline': u'Article 6', 'id': self.a6.id},
-                {'headline': u'Article 4', 'id': self.a4.id},
-                {'headline': u'Article 2', 'id': self.a2.id},
-                {'headline': u'Article 3', 'id': self.a3.id},
-                {'headline': u'Article 7', 'id': self.a7.id},
-                {'headline': u'Article 1', 'id': self.a1.id},
+                {'headline': 'Article 5', 'id': self.a5.id},
+                {'headline': 'Article 6', 'id': self.a6.id},
+                {'headline': 'Article 4', 'id': self.a4.id},
+                {'headline': 'Article 2', 'id': self.a2.id},
+                {'headline': 'Article 3', 'id': self.a3.id},
+                {'headline': 'Article 7', 'id': self.a7.id},
+                {'headline': 'Article 1', 'id': self.a1.id},
             ],
             transform=identity)
 
@@ -203,13 +203,13 @@ class LookupTests(TestCase):
         self.assertQuerysetEqual(
             Article.objects.values_list('headline'),
             [
-                (u'Article 5',),
-                (u'Article 6',),
-                (u'Article 4',),
-                (u'Article 2',),
-                (u'Article 3',),
-                (u'Article 7',),
-                (u'Article 1',),
+                ('Article 5',),
+                ('Article 6',),
+                ('Article 4',),
+                ('Article 2',),
+                ('Article 3',),
+                ('Article 7',),
+                ('Article 1',),
             ], transform=identity)
         self.assertQuerysetEqual(
             Article.objects.values_list('id').order_by('id'),
@@ -393,7 +393,7 @@ class LookupTests(TestCase):
         try:
             Article.objects.filter(pub_date_year='2005').count()
             self.fail("FieldError not raised.")
-        except FieldError, ex:
+        except FieldError as ex:
             self.assertEqual(
                 str(ex),
                 "Cannot resolve keyword 'pub_date_year' into field. "
@@ -401,7 +401,7 @@ class LookupTests(TestCase):
         try:
             Article.objects.filter(headline__starts='Article')
             self.fail("FieldError not raised.")
-        except FieldError, ex:
+        except FieldError as ex:
             self.assertEqual(
                 str(ex),
                 "Join on field 'headline' not permitted. "

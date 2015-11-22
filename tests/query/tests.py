@@ -9,8 +9,8 @@ try:
 except ImportError:
     from pymongo.objectid import ObjectId
 
-from models import *
-from utils import *
+from .models import *
+from .utils import *
 
 
 class BasicQueryTests(TestCase):
@@ -25,7 +25,7 @@ class BasicQueryTests(TestCase):
         Blog.objects.create(title='blog1')
         self.assertEqual(Blog.objects.count(), 1)
         blog2 = Blog.objects.create(title='blog2')
-        self.assertIsInstance(blog2.pk, unicode)
+        self.assertIsInstance(blog2.pk, str)
         self.assertEqual(Blog.objects.count(), 2)
         blog2.delete()
         self.assertEqual(Blog.objects.count(), 1)
@@ -105,7 +105,7 @@ class BasicQueryTests(TestCase):
 
     def test_date_datetime_and_time(self):
         self.assertEqual(DateModel().datelist, DateModel._datelist_default)
-        self.assert_(DateModel().datelist is not DateModel._datelist_default)
+        self.assertTrue(DateModel().datelist is not DateModel._datelist_default)
         DateModel.objects.create()
         self.assertNotEqual(DateModel.objects.get().datetime, None)
         DateModel.objects.update(
@@ -343,11 +343,11 @@ class BasicQueryTests(TestCase):
         entry2 = Post.objects.create(blog=blog, title='footitle2',
                                      content='foocontent2')
         self.assertEqualLists(
-            Post.objects.values(),
-            [{'blog_id': blog.id, 'title': u'footitle', 'id': entry.id,
-              'content': u'foocontent', 'date_published': None},
-             {'blog_id': blog.id, 'title': u'footitle2', 'id': entry2.id,
-              'content': u'foocontent2', 'date_published': None}])
+            list(Post.objects.values()),
+            [{'blog_id': blog.id, 'title': 'footitle', 'id': entry.id,
+              'content': 'foocontent', 'date_published': None},
+             {'blog_id': blog.id, 'title': 'footitle2', 'id': entry2.id,
+              'content': 'foocontent2', 'date_published': None}])
         self.assertEqualLists(
             Post.objects.values('blog'),
             [{'blog': blog.id}, {'blog': blog.id}])
@@ -356,8 +356,8 @@ class BasicQueryTests(TestCase):
             [(blog.id, None), (blog.id, None)])
         self.assertEqualLists(
             Post.objects.values('title', 'content'),
-            [{'title': u'footitle', 'content': u'foocontent'},
-             {'title': u'footitle2', 'content': u'foocontent2'}])
+            [{'title': 'footitle', 'content': 'foocontent'},
+             {'title': 'footitle2', 'content': 'foocontent2'}])
 
 
 class UpdateTests(TestCase):
@@ -385,7 +385,7 @@ class UpdateTests(TestCase):
         self.assertEqual(Blog.objects.filter(title='Blog').count(), 2)
 
     def test_update_id(self):
-        self.assertRaisesRegexp(DatabaseError, "Can not modify _id",
+        self.assertRaisesRegex(DatabaseError, "Can not modify _id",
                                 Post.objects.update, id=ObjectId())
 
     def test_update_with_F(self):
@@ -602,8 +602,8 @@ class OrLookupsTests(TestCase):
             3)
 
         self.assertQuerysetEqual(
-            Article.objects.filter(Q(headline__startswith='Hello'),
-                                   Q(headline__contains='bye')).values(),
+            list(Article.objects.filter(Q(headline__startswith='Hello'),
+                                   Q(headline__contains='bye')).values()),
             [{'headline': "Hello and goodbye", 'id': self.a3,
               'pub_date': datetime.datetime(2005, 11, 29)}],
             lambda o: o)

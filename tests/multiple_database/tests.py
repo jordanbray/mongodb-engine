@@ -1,7 +1,7 @@
 import datetime
 import pickle
 import sys
-from StringIO import StringIO
+from io import StringIO
 
 from django.conf import settings
 from django.contrib.auth.models import User
@@ -10,12 +10,12 @@ from django.db import connections, router, DEFAULT_DB_ALIAS
 from django.db.models import signals
 from django.db.utils import ConnectionRouter, DatabaseError
 
-from models import Book, Person, Pet, Review, UserProfile
+from .models import Book, Person, Pet, Review, UserProfile
 
 try:
     # we only have these models if the user is using multi-db, it's safe the
     # run the tests without them though.
-    from models import Article, article_using
+    from .models import Article, article_using
 except ImportError:
     pass
 
@@ -163,7 +163,7 @@ class QueryTestCase(TestCase):
 
         # Retrieve related object by descriptor. Related objects should be database-bound
         self.assertEqual(list(chris.edited.values_list('title', flat=True)),
-                          [u'Dive into Python'])
+                          ['Dive into Python'])
 
     def test_foreign_key_cross_database_protection(self):
         "Operations that involve sharing FK objects across databases raise an error"
@@ -216,37 +216,37 @@ class QueryTestCase(TestCase):
         self.assertEqual(html5._state.db, 'other')
         # ... but it isn't saved yet
         self.assertEqual(list(Person.objects.using('other').values_list('name',flat=True)),
-                          [u'Mark Pilgrim'])
+                          ['Mark Pilgrim'])
         self.assertEqual(list(Book.objects.using('other').values_list('title',flat=True)),
-                           [u'Dive into Python'])
+                           ['Dive into Python'])
 
         # When saved (no using required), new objects goes to 'other'
         chris.save()
         html5.save()
         self.assertEqual(list(Person.objects.using('default').values_list('name',flat=True)),
-                          [u'Marty Alchin'])
+                          ['Marty Alchin'])
         self.assertEqual(list(Person.objects.using('other').values_list('name',flat=True)),
-                          [u'Chris Mills', u'Mark Pilgrim'])
+                          ['Chris Mills', 'Mark Pilgrim'])
         self.assertEqual(list(Book.objects.using('default').values_list('title',flat=True)),
-                          [u'Pro Django'])
+                          ['Pro Django'])
         self.assertEqual(list(Book.objects.using('other').values_list('title',flat=True)),
-                          [u'Dive into HTML5', u'Dive into Python'])
+                          ['Dive into HTML5', 'Dive into Python'])
 
         # This also works if you assign the FK in the constructor
         water = Book(title="Dive into Water", published=datetime.date(2001, 1, 1), editor=mark)
         self.assertEqual(water._state.db, 'other')
         # ... but it isn't saved yet
         self.assertEqual(list(Book.objects.using('default').values_list('title',flat=True)),
-                          [u'Pro Django'])
+                          ['Pro Django'])
         self.assertEqual(list(Book.objects.using('other').values_list('title',flat=True)),
-                          [u'Dive into HTML5', u'Dive into Python'])
+                          ['Dive into HTML5', 'Dive into Python'])
 
         # When saved, the new book goes to 'other'
         water.save()
         self.assertEqual(list(Book.objects.using('default').values_list('title',flat=True)),
-                          [u'Pro Django'])
+                          ['Pro Django'])
         self.assertEqual(list(Book.objects.using('other').values_list('title',flat=True)),
-                          [u'Dive into HTML5', u'Dive into Python', u'Dive into Water'])
+                          ['Dive into HTML5', 'Dive into Python', 'Dive into Water'])
 
     def test_foreign_key_validation(self):
         "ForeignKey.validate() uses the correct database"
@@ -316,13 +316,13 @@ class QueryTestCase(TestCase):
         # When saved (no using required), new objects goes to 'other'
         bob_profile.save()
         self.assertEqual(list(User.objects.using('default').values_list('username',flat=True)),
-                          [u'alice'])
+                          ['alice'])
         self.assertEqual(list(User.objects.using('other').values_list('username',flat=True)),
-                          [u'bob', u'charlie'])
+                          ['bob', 'charlie'])
         self.assertEqual(list(UserProfile.objects.using('default').values_list('flavor',flat=True)),
-                           [u'chocolate'])
+                           ['chocolate'])
         self.assertEqual(list(UserProfile.objects.using('other').values_list('flavor',flat=True)),
-                           [u'crunchy frog', u'spring surprise'])
+                           ['crunchy frog', 'spring surprise'])
 
         # This also works if you assign the O2O relation in the constructor
         denise = User.objects.db_manager('other').create_user('denise','denise@example.com')
@@ -331,16 +331,16 @@ class QueryTestCase(TestCase):
         self.assertEqual(denise_profile._state.db, 'other')
         # ... but it isn't saved yet
         self.assertEqual(list(UserProfile.objects.using('default').values_list('flavor',flat=True)),
-                           [u'chocolate'])
+                           ['chocolate'])
         self.assertEqual(list(UserProfile.objects.using('other').values_list('flavor',flat=True)),
-                           [u'crunchy frog', u'spring surprise'])
+                           ['crunchy frog', 'spring surprise'])
 
         # When saved, the new profile goes to 'other'
         denise_profile.save()
         self.assertEqual(list(UserProfile.objects.using('default').values_list('flavor',flat=True)),
-                           [u'chocolate'])
+                           ['chocolate'])
         self.assertEqual(list(UserProfile.objects.using('other').values_list('flavor',flat=True)),
-                           [u'crunchy frog', u'spring surprise', u'tofu'])
+                           ['crunchy frog', 'spring surprise', 'tofu'])
 
     def test_ordering(self):
         "get_next_by_XXX commands stick to a single database"
@@ -559,7 +559,7 @@ class RouterTestCase(TestCase):
 
         # Related object queries stick to the same database
         # as the original object, regardless of the router
-        self.assertEqual(pro.editor.name, u'Marty Alchin')
+        self.assertEqual(pro.editor.name, 'Marty Alchin')
 
         # get_or_create is a special case. The get needs to be targetted at
         # the write database in order to avoid potential transaction
